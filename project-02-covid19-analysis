@@ -1,0 +1,121 @@
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt
+df=pd.read_csv("Covid_19.csv")
+print(df.head())
+print(df.shape)
+print(df.columns)
+print(df.dtypes)
+print(df.isnull())
+print(df.describe())
+
+df=df.drop_duplicates()
+df.fillna(method="bfill", inplace=True)
+df.tail()
+
+df["Date"] = pd.to_datetime(df["Date"])   #So pandas undersatnd it as date not as string 
+print(df["Date"])
+
+#1  #Total world wide cases
+world_cases=df.groupby("Date")["Confirmed"].sum()   
+print(world_cases)
+
+#2.TOTAL NO OF DEATHS PER COUNTRY 
+#df_deaths=df.groupby("Country/Region")["Deaths"].mean()  #this gives average death so use sum()
+df_deaths=df.groupby("Country/Region")["Deaths"].sum()
+print("\n\n",df_deaths) 
+
+#3.Death Rate calculation
+country_data = df.groupby("Country/Region")[["Deaths","Confirmed"]].sum()
+
+country_data["Death Rate (%)"] = (country_data["Deaths"] / country_data["Confirmed"]) * 100
+
+print("\n\n",country_data)
+
+highest_deathrate= country_data["Death Rate (%)"].max()
+print("Country with highest death rate",highest_deathrate)
+
+highest_deathrate = country_data["Death Rate (%)"].idxmax()
+print("Country name with highest death rate:", highest_deathrate)
+
+#4.Country with active cases
+active_cases = df.groupby("Country/Region")["Active"].sum()
+print("\nACTIVE CASES:-\n\n", active_cases)
+
+# Find country with maximum active cases
+max_country = active_cases.idxmax()
+max_value = active_cases.max()
+print("\nCountry with Maximum Active Cases:", max_country)
+print("Maximum Active Cases:", max_value)
+
+#5.Find Top 5 Countries by Active Cases
+Top5_active=df.groupby("Country/Region")["Active"].sum().sort_values(ascending=False).head()
+print("\n\nTop 5 Countries with most active cases",Top5_active)
+
+#6.Recovery Rate
+country_Recovered = df.groupby("Country/Region")[["Recovered","Confirmed"]].sum()
+country_Recovered["Recovered Rate(%)"] = (country_Recovered["Recovered"] / country_Recovered["Confirmed"]) * 100
+print("Country Recovery\n", country_Recovered)
+
+# Find country with highest recovery rate
+max_recovered = country_Recovered["Recovered Rate(%)"].idxmax()
+max_recoveredvalue = country_Recovered["Recovered Rate(%)"].max()
+print("\nCountry with Highest Recovery Rate:", max_recovered)
+print("Highest Recovery Rate (%):", max_recoveredvalue)
+
+
+#7.PEAK DATE OF DEATH
+peak_date = world_dailycases.idxmax()
+print("Peak Daily Cases Date:", peak_date)
+
+
+#1. Worldwide Confirmed Cases Over Time
+plt.plot(world_cases)
+plt.title("Worldwide Confirmed Cases Over Time")
+plt.xlabel("Date")
+plt.ylabel("Total Confirmed Cases")
+plt.show()
+
+#2.Daily New cases
+world_dailycases=world_cases.diff()
+plt.plot(world_dailycases)
+plt.title("Daily Cases World Wide")
+plt.xlabel("Date")
+plt.ylabel("Daily new cases")
+plt.show()
+
+#3.TOP 5 COUNTRIES BY DEATH 
+df_deaths.sort_values(ascending=False).head(5).plot(kind="bar")
+plt.title("Top 10 countries by highest death")
+plt.xlabel("Country")
+plt.ylabel("no of deaths")
+plt.show()
+
+#4. Top 5 countries by recovery rate
+country_Recovered.groupby("Country/Region")["Recovered Rate(%)"].mean().sort_values(ascending=False).head(5).plot(kind="bar")
+plt.title("TOP 5 country with highest recovery rate")
+plt.xlabel("Country")
+plt.ylabel("Recovery rate")
+plt.show()
+
+#5.GLOBAL DEATH RATE OVER TIME 
+global_data = df.groupby("Date")[["Confirmed","Deaths"]].sum()
+
+global_data["Global Death Rate (%)"] = (
+    global_data["Deaths"] / global_data["Confirmed"]
+) * 100
+
+plt.plot(global_data["Global Death Rate (%)"])
+plt.title("Global Death Rate Over Time")
+plt.xlabel("Date")
+plt.ylabel("Death Rate (%)")
+plt.show()
+
+
+#SUMMARY OF THE VISUALIZATION
+print("                    SUMMARY      \n       ")
+print("Global confirmed cases peaked on",peak_date)
+print("Highest death rate country is",highest_deathrate)
+print("Country with highest active cases is", max_country)
+print("Country with highest recovery rate is",max_recovered)
+print(" \n           ====SUMMARY REPORT====     ")
