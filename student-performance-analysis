@@ -1,0 +1,146 @@
+# Step 1 :- LIBRARY IMPORTING 
+import pandas as pd 
+import numpy as np 
+import matplotlib.pyplot as plt 
+
+# STEP 2:-DATA LOADING  UNDERSTANDING 
+# Identify 1.numerical columns(marks,age,absenses etc ) 
+#          2.Categorial columns(Gender,parentsedu,etc)
+
+df=pd.read_csv("student_data.csv")
+print(df.head())
+print(df.shape)
+print(df.columns)
+
+
+#Step 3:-EXPLORATORY DATA ANALYSIS (or initial data inspection)
+#1.Check data types
+print(df.dtypes)
+#2.check missing values 
+print(df.isnull())
+#since all false so null value so data is already cleaned.
+#3.DESCRIBE 
+print(df.describe()) 
+# Purpose: Detect problems early,Understand distributions ,Identify numeric vs categorical
+
+#Step 4:-DATA CLEANING IF NEEDED 
+
+df = df.dropna()  # or
+df.ffill()
+inplace=True
+
+#REMOVES DUPLICATE VALUES
+df = df.drop_duplicates()
+
+#FIX DATATYPES IF REQUIRED 
+df["age"] = df["age"].astype(int)
+
+# Check outliers (optional but powerful)
+
+plt.boxplot(df["absences"])
+plt.title("Outlier Check")
+plt.show()
+"""
+ STEP 5: Feature Understanding
+
+Dataset contains:
+
+Categorical: school, sex, address, etc.
+
+Numerical: age, absences, G1, G2, G3
+
+G3 = final grade (very important target variable)
+
+"""
+#STEP 6: Basic Analysis (VERY IMPORTANT)
+
+#1. Maximum final grade
+max_grade = df["G3"].max()
+print("Maximum Final Grade:", max_grade)
+#2. Average final grade
+avg_grade = df["G3"].mean()
+print("Average Final Grade:", avg_grade)
+#3. Students by gender
+gender_count = df["sex"].value_counts()
+print(gender_count)
+#4. School-wise performance
+school_perf = df.groupby("school")["G3"].mean()
+print(school_perf)
+#5. Absences impact on grades
+correlation = df["absences"].corr(df["G3"])
+print("Correlation:", correlation)
+
+"""
+Range of correlation values:-
+Correlation always lies between -1 and +1
+Value	Meaning:-
++1	Perfect positive relationship
+0	No relationship
+-1	Perfect negative relationship
+
+"""
+
+#STEP 7: Visualization (CORE PART)
+
+#1. Gender distribution (Pie Chart)
+df["sex"].value_counts().plot(
+    kind="pie",
+    autopct="%1.1f%%",
+    title="Gender Distribution"
+)
+plt.ylabel("")
+plt.show()
+plt.plot()
+
+#2. Final Grade Distribution (Histogram)
+plt.hist(df["G3"],histtype="step")
+plt.title("Final Grade")
+plt.xlabel("G3 Grade")
+plt.ylabel("No of students")
+plt.show()
+
+# 3. School vs Average Grade (Bar Chart)
+
+df.groupby("school")["G3"].mean().plot(kind="bar")
+plt.title("Average Grade by School")
+plt.xlabel("School")
+plt.ylabel("Average G3")
+plt.show()
+#or
+df.groupby("school")["G3"].mean().plot.bar()
+plt.title("Average Grade by School")
+plt.xlabel("School")
+plt.ylabel("Average G3")
+plt.show()
+
+#4. Absences vs Final Grade (Scatter Plot) ⭐ VERY IMPORTANT
+plt.scatter(df["absences"], df["G3"])
+plt.title("Absences vs Final Grade")
+plt.xlabel("Absences")
+plt.ylabel("G3")
+plt.show()
+# each dot one student means(5,12) 5 miss class 12 marks only in G3 
+#if 40 absent classes then 1 student scored only 10 grade 
+
+#STEP 8: Advanced Visualizations (Optional but impressive)
+#Correlation heatmap (very powerful)
+corr = df.corr(numeric_only=True)
+
+plt.imshow(corr)
+plt.colorbar()
+plt.title("Correlation Heatmap")
+
+plt.xticks(range(len(corr.columns)), corr.columns, rotation=90)
+plt.yticks(range(len(corr.columns)), corr.columns)
+
+
+plt.show()
+
+#STEP 9: Generate Summary (for assignment/report)
+print("SUMMARY")
+print("Maximum Grade:", df["G3"].max())
+print("Average Grade:", df["G3"].mean())
+print("Best Performing School:", df.groupby("school")["G3"].mean().idxmax())
+#“Which school has the highest average final grade?” above 
+print("Most Students Gender:", df["sex"].value_counts().idxmax()) #idmax() Returns the category with the highest count.
+print("\n===== SUMMARY REPORT =====")
